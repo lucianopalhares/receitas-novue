@@ -9,9 +9,144 @@ export const swaggerDocument = {
   servers: [ { url: '/' } ],
   tags: [
     { name: 'Usuários', description: 'Cadastro e sessão de usuário' },
+    { name: 'Receitas', description: 'Receitas do usuário autenticado' },
     { name: 'Sistema', description: 'Estado da API' }
   ],
   paths: {
+    // Receitas ficam sempre limitadas pela sessão atual.
+    '/receitas': {
+      get: {
+        tags: ['Receitas'],
+        summary: 'Listar ou pesquisar receitas do usuário atual',
+        description: 'A busca opcional considera nome e ingredientes.',
+        security: [{ bearerAuth: [] }],
+        parameters: [{
+          in: 'query',
+          name: 'q',
+          schema: { type: 'string' },
+          description: 'Texto para pesquisar nas receitas.'
+        }],
+        responses: {
+          '200': {
+            description: 'Receitas do usuário autenticado.',
+            content: {
+              'application/json': {
+                schema: { type: 'array', items: { $ref: '#/components/schemas/Receita' } }
+              }
+            }
+          },
+          '401': { description: 'Sessão inválida ou expirada.' }
+        }
+      },
+      post: {
+        tags: ['Receitas'],
+        summary: 'Cadastrar receita para o usuário atual',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/DadosReceita' },
+              example: {
+                categoriaId: 7,
+                nome: 'Macarrão ao molho',
+                tempoPreparoMinutos: 30,
+                porcoes: 4,
+                modoPreparo: 'Cozinhe a massa e misture ao molho.',
+                ingredientes: 'Massa, tomate e temperos'
+              }
+            }
+          }
+        },
+        responses: {
+          '201': {
+            description: 'Receita cadastrada.',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Receita' }
+              }
+            }
+          },
+          '400': { description: 'Dados da receita inválidos.' },
+          '401': { description: 'Sessão inválida ou expirada.' }
+        }
+      }
+    },
+    '/receitas/{id}': {
+      get: {
+        tags: ['Receitas'],
+        summary: 'Consultar receita do usuário atual',
+        security: [{ bearerAuth: [] }],
+        parameters: [{
+          in: 'path',
+          name: 'id',
+          required: true,
+          schema: { type: 'integer' }
+        }],
+        responses: {
+          '200': {
+            description: 'Receita encontrada.',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Receita' }
+              }
+            }
+          },
+          '400': { description: 'Id inválido.' },
+          '401': { description: 'Sessão inválida ou expirada.' },
+          '404': { description: 'Receita não encontrada.' }
+        }
+      },
+      put: {
+        tags: ['Receitas'],
+        summary: 'Atualizar receita do usuário atual',
+        security: [{ bearerAuth: [] }],
+        parameters: [{
+          in: 'path',
+          name: 'id',
+          required: true,
+          schema: { type: 'integer' }
+        }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/DadosReceita' }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Receita atualizada.',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Receita' }
+              }
+            }
+          },
+          '400': { description: 'Dados ou id inválidos.' },
+          '401': { description: 'Sessão inválida ou expirada.' },
+          '404': { description: 'Receita não encontrada.' }
+        }
+      },
+      delete: {
+        tags: ['Receitas'],
+        summary: 'Excluir receita do usuário atual',
+        security: [{ bearerAuth: [] }],
+        parameters: [{
+          in: 'path',
+          name: 'id',
+          required: true,
+          schema: { type: 'integer' }
+        }],
+        responses: {
+          '204': { description: 'Receita excluída.' },
+          '400': { description: 'Id inválido.' },
+          '401': { description: 'Sessão inválida ou expirada.' },
+          '404': { description: 'Receita não encontrada.' }
+        }
+      }
+    },
     '/usuarios': {
       post: {
         tags: ['Usuários'],
@@ -254,6 +389,32 @@ export const swaggerDocument = {
           token: { type: 'string', example: 'token-de-sessao' },
           usuario: { $ref: '#/components/schemas/Usuario' }
         }
+      },
+      DadosReceita: {
+        type: 'object',
+        required: ['modoPreparo'],
+        properties: {
+          categoriaId: { type: 'integer', nullable: true, example: 7 },
+          nome: { type: 'string', nullable: true, maxLength: 45, example: 'Macarrão ao molho' },
+          tempoPreparoMinutos: { type: 'integer', nullable: true, minimum: 0, example: 30 },
+          porcoes: { type: 'integer', nullable: true, minimum: 0, example: 4 },
+          modoPreparo: { type: 'string', example: 'Cozinhe a massa e misture ao molho.' },
+          ingredientes: { type: 'string', nullable: true, example: 'Massa, tomate e temperos' }
+        }
+      },
+      Receita: {
+        allOf: [
+          { $ref: '#/components/schemas/DadosReceita' },
+          {
+            type: 'object',
+            properties: {
+              id: { type: 'integer', example: 12 },
+              categoriaNome: { type: 'string', nullable: true, example: 'Massas' },
+              criadoEm: { type: 'string', format: 'date-time' },
+              alteradoEm: { type: 'string', format: 'date-time' }
+            }
+          }
+        ]
       },
       Erro: {
         type: 'object',
