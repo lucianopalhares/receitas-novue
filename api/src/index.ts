@@ -1,31 +1,22 @@
 import express from 'express';
-import mysql from 'mysql2/promise';
+import { authRoutes } from './auth';
+import { db } from './db';
+
 
 const app = express();
 const port = Number(process.env.PORT || 3000);
 
-
-const db = mysql.createPool({
-  host: process.env.DB_HOST || '127.0.0.1',
-  port: Number(process.env.DB_PORT || 3306),
-  user: process.env.DB_USER || 'receitas',
-  password: process.env.DB_PASSWORD || 'receitas',
-  database: process.env.DB_NAME || 'teste_receitas_rg_sistemas',
-  waitForConnections: true,
-  connectionLimit: 10
-});
-
 app.use(express.json());
+app.use(authRoutes( db ));
 
-app.get('/health', async (_req, res ) => {
-  let code  = 200;
+app.get('/health', async (_req, res) => {
+  let code = 200;
   let result = { status: 'ok', database: 'conectado' };
 
   try {
-    // confere a conexao
     await db.query('SELECT 1');
   } catch {
-   code = 503;
+    code = 503;
     result = {
       status: 'error',
       database: 'disconectado'
@@ -36,5 +27,5 @@ app.get('/health', async (_req, res ) => {
 });
 
 app.listen(port, () => {
-   console.log(`API rodando na portaa ${port}`);
+  console.log('API rodando na portaa ' + port);
 });
