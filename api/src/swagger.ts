@@ -116,6 +116,39 @@ export const swaggerDocument = {
         }
       }
     },
+    '/auth/me': {
+      get: {
+        tags: ['Usuários'],
+        summary: 'Consultar usuário da sessão atual',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': {
+            description: 'Usuário autenticado.',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Usuario' }
+              }
+            }
+          },
+          '401': {
+            description: 'Token ausente, inválido ou expirado.',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Erro' }
+              }
+            }
+          },
+          '500': {
+            description: 'Erro ao consultar sessão.',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Erro' }
+              }
+            }
+          }
+        }
+      }
+    },
     '/auth/logout': {
       post: {
         tags: ['Usuários'],

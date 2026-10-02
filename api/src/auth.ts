@@ -9,6 +9,12 @@ interface Usuario extends RowDataPacket {
   senha: string;
 }
 
+interface UsuarioSessao extends RowDataPacket {
+  id: number;
+  nome: string | null;
+  login: string;
+}
+
 function hashSenha(senha: string) {
   const salt = randomBytes(16).toString('base64url');
   const hash = scryptSync(senha, salt, 48).toString('base64url');
@@ -97,6 +103,39 @@ export function authRoutes(db: Pool) {
     } catch (err) {
       console.error(err);
       return res.status(500).json({ erro: 'Não foi possível iniciar a sessão.' });
+    }
+
+  });
+
+  router.get('/auth/me', async ( req, res ) => {
+    const header = req.get('authorization') || '';
+    const match = header.match(/^Bearer\s+(.+)$/i);
+
+    if (!match) {
+       return res.status(401).json({ erro: 'Token de sessão obrigatório.' });
+    }
+
+    try {
+      const [rows] = await db.execute<UsuarioSessao[]>(
+        'SELECT u.id, u.nome, u.login FROM sessoes_usuario s INNER JOIN usuarios u ON u.id = s.id_usuarios WHERE s.token_hash = ? AND s.expira_em > NOW() LIMIT 1',
+        [hashToken(match[1])]
+      );
+
+      const usuario = rows[0];
+
+      if (!usuario) {
+        return res.status(401).json({ erro: 'Sessão inválida ou expirada.' });
+      }
+
+      return res.json({
+        id: usuario.id,
+        nome: usuario.nome,
+        login: usuario.login
+      });
+
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ erro: 'Não foi possível consultar a sessão!' });
     }
 
   });
