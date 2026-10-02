@@ -1,0 +1,21 @@
+{
+  "name": "receitas-api",
+  "version": "1.0.0",
+  "description": "Api local para gerenciar recietas",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build" : "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "mysql2": "^3.14.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/node": "^22.15.30",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  }
+}

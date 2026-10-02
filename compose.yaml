@@ -1,0 +1,42 @@
+services:
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-localroot}
+      MYSQL_DATABASE:  teste_receitas_rg_sistemas
+      MYSQL_USER: ${MYSQL_USER:-receitas}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-receitas}
+    ports:
+      - "3338:3306"
+    expose:
+      - 3306
+    volumes:
+      - receitas_mysql:/var/lib/mysql
+      - ./banco/script.sql:/docker-entrypoint-initdb.d/01-script.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p$${MYSQL_ROOT_PASSWORD} --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  api:
+    build:
+      context: .
+      dockerfile:  Dockerfile
+    restart: unless-stopped
+    environment:
+      PORT: 3000
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: teste_receitas_rg_sistemas
+      DB_USER: ${MYSQL_USER:-receitas}
+      DB_PASSWORD: ${MYSQL_PASSWORD:-receitas}
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+
+volumes:
+  receitas_mysql:
