@@ -31,7 +31,7 @@ export function validarDadosReceita(entrada: unknown): DadosReceita {
 
 
   if ((nome && nome.trim().length > 45) || typeof modoPreparo !== 'string' ||
-      !modoPreparo.trim()) {
+    !modoPreparo.trim()) {
     throw new ReceitaInvalida();
   }
 
