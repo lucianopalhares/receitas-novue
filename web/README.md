@@ -1,6 +1,8 @@
 # Aplicação web
 
-O painel usa Vue 3 e typeScript. A pasta `src/identidade` separa domínio, casos de uso, portas, integração HTTP e apresentação. O dashboard fica protegido por sessão e está vazio, esta pronto pra receber modulos depois. 
+O painel usa Vue 3 e TypeScript. As pastas `src/identidade` e `src/receitas` separam dominio, casos de uso, portas, integração HTTP e apresentacao. O dashboard fica protegido por sessão e permite cadastrar, pesquisar, editar, excluir e imprimir receitas.
+
+
 
 ## Rodar com docker
 
@@ -15,6 +17,8 @@ Abra `http://localhost:8187`. A API fica em `http://localhost:3005` e o Swagger 
 Crie uma conta pela opção **Criar conta** e depois entre com o login e a senha cadastrados. O token é guardado no navegador; sair encerra a sessão na API e remove o token local.
 
 Para parar os serviços, use `Ctrl+C` ou execute `docker compose down` na raiz. O banco continua no volume nomeado do Compose.
+
+
 
 ## Rodar o frontend em desenvolvimento
 
@@ -32,4 +36,4 @@ npm install
 npm run dev
 ```
 
-Abra o endereço mostrado pelo Vite (por padrão, `http://localhost:5173`). O proxy do Vite encaminha as rotas da API para `http://localhost:3005`.
+Abrir o endereço mostrado pelo Vite (por padrão, `http://localhost:5173`). O proxy do Vite encaminha as rotas da API para `http://localhost:3005`.
