@@ -27,6 +27,7 @@ const filtro = ref('');
 const modalAberto = ref(false);
 
 const salvando = ref(false);
+const avisoSucesso = ref('');
 
 
 const editandoId = ref<number | null>(null);
@@ -59,10 +60,12 @@ function limparFormulario() {
 
 function novaReceita() {
   limparFormulario();
+  avisoSucesso.value = '';
   modalAberto.value = true;
 }
 
 async function editarReceita(receita: Receita) {
+    avisoSucesso.value = '';
     estadoReceitas.erro = '';
   try {
       const dados = await buscarReceita(receita.id);
@@ -99,13 +102,16 @@ function dadosDoFormulario(): DadosReceita {
 
 async function salvarReceita() {
   estadoReceitas.erro = '';
+  avisoSucesso.value = '';
   salvando.value = true;
   try {
     const dados = dadosDoFormulario();
     if (editandoId.value) {
         await atualizarReceita(editandoId.value, dados);
+        avisoSucesso.value = 'Receita atualizada com sucesso.';
     } else {
       await criarReceita(dados);
+      avisoSucesso.value = 'Receita cadastrada com sucesso.';
       }
     modalAberto.value = false;
     } catch (err) {
@@ -121,8 +127,10 @@ async function removerReceita(receita: Receita) {
   if (!window.confirm(`Excluir ${nome}? Esta ação não pode ser desfeita.`)) return;
 
   estadoReceitas.erro = '';
+  avisoSucesso.value = '';
   try {
       await excluirReceita(receita.id);
+      avisoSucesso.value = 'Receita excluída com sucesso.';
   } catch (err) {
       estadoReceitas.erro = err instanceof Error ? err.message : 'Não foi possível excluir a receita.';
   }
@@ -200,6 +208,9 @@ function imprimir(receita: Receita) {
     <p v-if="estadoReceitas.erro" class="notice notice-error recipe-error" role="alert">
       {{ estadoReceitas.erro }}
   </p>
+    <p v-if="avisoSucesso" class="notice notice-success recipe-error" role="status">
+      {{ avisoSucesso }}
+    </p>
 
       <div class="recipe-table-wrap">
 
