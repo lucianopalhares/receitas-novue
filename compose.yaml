@@ -24,7 +24,7 @@ services:
   api:
     build:
       context: .
-      dockerfile:  Dockerfile
+      dockerfile: Dockerfile
     restart: unless-stopped
     environment:
       PORT: 3000
@@ -40,6 +40,18 @@ services:
       - "3005:3000"
     expose:
       - 3000
+
+  web:
+    build:
+      context: .
+      dockerfile: web/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "8187:80"
+    expose:
+      - 80
 
 volumes:
   receitas_mysql:
